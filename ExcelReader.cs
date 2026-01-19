@@ -31,13 +31,13 @@ namespace generatexml
 
         // Static HashSet constants for O(1) lookups (instead of O(n) array scans)
         private static readonly HashSet<string> ValidQuestionTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { "radio", "combobox", "checkbox", "text", "date", "information", "automatic", "button" };
+            { "radio", "combobox", "checkbox", "text", "date", "information", "calculated", "button" };
 
         private static readonly HashSet<string> ValidFieldTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "text", "datetime", "date", "phone_num", "integer", "text_integer", "text_decimal", "text_id", "n/a", "hourmin" };
 
         private static readonly HashSet<string> BuiltInAutoFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { "starttime", "stoptime", "uniqueid", "swver", "survey_id", "lastmod" };
+            { "starttime", "startdate", "uuid", "swver", "survey_id", "lastmod", "stoptime" };
 
         private static readonly HashSet<string> DateFieldTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "date", "datetime" };
@@ -141,7 +141,7 @@ namespace generatexml
 
                                 // Get Question Text
                                 curQuestion.questionText = GetCellValue(data, rowCount, 4);
-                                if (curQuestion.questionText == "" && curQuestion.questionType != "automatic")
+                                if (curQuestion.questionText == "" && curQuestion.questionType != "calculated")
                                 {
                                     errorsEncountered = true;
                                     worksheetErrorsEncountered = true;
@@ -165,10 +165,10 @@ namespace generatexml
                                 }
                                 else if (rawResponses.Trim().StartsWith("calc:", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    // Only parse calculations for automatic question types
-                                    if (curQuestion.questionType == "automatic")
+                                    // Only parse calculations for calculated question types
+                                    if (curQuestion.questionType == "calculated")
                                     {
-                                        // Exclude built-in automatic fields that don't need calculations
+                                        // Exclude built-in calculated fields that don't need calculations
                                         // Using static HashSet for O(1) lookup (case-insensitive)
                                         if (!BuiltInAutoFields.Contains(curQuestion.fieldName))
                                         {
@@ -179,7 +179,7 @@ namespace generatexml
                                     {
                                         errorsEncountered = true;
                                         worksheetErrorsEncountered = true;
-                                        logstring.Add($"ERROR - Calculation: FieldName '{curQuestion.fieldName}' in worksheet '{worksheet.Name}' has calculation syntax but QuestionType is not 'automatic'.");
+                                        logstring.Add($"ERROR - Calculation: FieldName '{curQuestion.fieldName}' in worksheet '{worksheet.Name}' has calculation syntax but QuestionType is not 'calculated'.");
                                     }
                                 }
                                 else if (rawResponses.Trim().StartsWith("mask:", StringComparison.OrdinalIgnoreCase))
@@ -381,7 +381,13 @@ namespace generatexml
         private void CheckFieldName(string worksheet, string fieldname)
         {
 
-            if (char.IsDigit(fieldname[0]))
+            if (BuiltInAutoFields.Contains(fieldname))
+            {
+                errorsEncountered = true;
+                worksheetErrorsEncountered = true;
+                logstring.Add("ERROR - FieldName: " + worksheet + " has a reserved FieldName that cannot be used: " + fieldname);
+            }
+            else if (char.IsDigit(fieldname[0]))
             {
                 errorsEncountered = true;
                 worksheetErrorsEncountered = true;
@@ -454,8 +460,15 @@ namespace generatexml
             string fieldname = question.fieldName;
             string responseStr = question.responses;
 
+            // Check for deprecated 'automatic' QuestionType
+            if (questiontype.Equals("automatic", StringComparison.OrdinalIgnoreCase))
+            {
+                errorsEncountered = true;
+                worksheetErrorsEncountered = true;
+                logstring.Add("ERROR - QuestionType: The QuestionType 'automatic' for FieldName '" + fieldname + "' in table '" + tblename + "' is no longer supported.");
+            }
             // Using static HashSets for O(1) lookup instead of array O(n) scan
-            if (!ValidQuestionTypes.Contains(questiontype))
+            else if (!ValidQuestionTypes.Contains(questiontype))
             {
                 errorsEncountered = true;
                 worksheetErrorsEncountered = true;
@@ -1033,7 +1046,7 @@ namespace generatexml
                 foreach (Question question in QuestionList)
                 {
                     curFieldname = question.fieldName;
-                    if ((question.fieldType == "text" || question.fieldType == "text_integer" || question.fieldType == "phone_num") && question.questionType != "automatic" && question.questionType != "checkbox" && question.questionType != "combobox")
+                    if ((question.fieldType == "text" || question.fieldType == "text_integer" || question.fieldType == "phone_num") && question.questionType != "calculated" && question.questionType != "checkbox" && question.questionType != "combobox")
                     {
                         if (question.maxCharacters == "-9")
                         {
@@ -1200,7 +1213,7 @@ namespace generatexml
         }
 
         //////////////////////////////////////////////////////////////////////
-        // Function to parse automatic calculation configuration
+        // Function to parse calculated field calculation configuration
         //////////////////////////////////////////////////////////////////////
         private void ParseAutomaticCalculation(string responsesStr, Question question, string worksheetName, string fieldName)
         {

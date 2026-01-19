@@ -92,7 +92,7 @@ namespace generatexml
         public string ResponseNotInListValue { get; set; }
         public string ResponseNotInListLabel { get; set; }
 
-        // Automatic calculation fields
+        // Calculated field calculation properties
         public CalculationType CalculationType { get; set; } = CalculationType.None;
 
         // For query calculations

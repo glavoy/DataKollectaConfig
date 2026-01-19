@@ -222,12 +222,12 @@ Using checkboxes for multi-select with "Don't know" and "Not in this list" optio
 **Scenario:** "Who slept under this net last night?" Multiple people can share a net.
 
 ```xml
-<!-- Automatic field: household ID -->
-<question type='automatic' fieldname='hhid' fieldtype='text'>
+<!-- Calculated field: household ID -->
+<question type='calculated' fieldname='hhid' fieldtype='text'>
 </question>
 
-<!-- Automatic field: net number -->
-<question type='automatic' fieldname='netnum' fieldtype='integer'>
+<!-- Calculated field: net number -->
+<question type='calculated' fieldname='netnum' fieldtype='integer'>
 </question>
 
 <!-- Multi-select from household members -->
@@ -478,8 +478,8 @@ region,mrccode,mrcname,villagename,villagecode,vcode
 
 **XML Configuration:**
 ```xml
-<!-- Automatic field: household ID (from parent form) -->
-<question type='automatic' fieldname='hhid' fieldtype='text'>
+<!-- Calculated field: household ID (from parent form) -->
+<question type='calculated' fieldname='hhid' fieldtype='text'>
 </question>
 
 <!-- Text input: Child's name -->

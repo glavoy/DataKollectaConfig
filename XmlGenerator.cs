@@ -49,12 +49,12 @@ namespace generatexml
                                                                                    "' fieldtype = '", question.fieldType, "'>"));
 
 
-                        // Write the text if it is not an automatic question
-                        if (question.questionType != "automatic")
+                        // Write the text if it is not a calculated question
+                        if (question.questionType != "calculated")
                             outputFile.WriteLine(string.Concat("\t\t<text>", question.questionText, "</text>"));
 
-                        // Generate calculation XML for automatic questions with custom calculations
-                        if (question.questionType == "automatic" && question.CalculationType != CalculationType.None)
+                        // Generate calculation XML for calculated questions with custom calculations
+                        if (question.questionType == "calculated" && question.CalculationType != CalculationType.None)
                         {
                             GenerateCalculationXml(outputFile, question);
                         }
@@ -399,7 +399,7 @@ namespace generatexml
 
 
         //////////////////////////////////////////////////////////////////////
-        // Function to generate the XML for automatic calculations
+        // Function to generate the XML for calculated field calculations
         //////////////////////////////////////////////////////////////////////
         private void GenerateCalculationXml(StreamWriter outputFile, Question question)
         {

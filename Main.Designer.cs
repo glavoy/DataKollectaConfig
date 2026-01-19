@@ -63,7 +63,7 @@
             // 
             // pictureBoxGisTX
             // 
-            this.pictureBoxGisTX.Image = global::generatexml.Properties.Resources.gistx;
+            this.pictureBoxGisTX.Image = global::generatexml.Properties.Resources.datakollecta;
             this.pictureBoxGisTX.InitialImage = ((System.Drawing.Image)(resources.GetObject("pictureBoxGisTX.InitialImage")));
             this.pictureBoxGisTX.Location = new System.Drawing.Point(37, 27);
             this.pictureBoxGisTX.Name = "pictureBoxGisTX";

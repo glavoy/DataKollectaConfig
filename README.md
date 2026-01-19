@@ -185,6 +185,19 @@ The variable/field name that will be used in the database and XML.
 - Can only contain letters, numbers, and underscores
 - No spaces allowed
 - Must be unique within the worksheet
+- Cannot use reserved field names (see below)
+
+**Reserved Field Names:**
+
+The following field names are reserved by the system and **cannot be used** as FieldNames:
+
+- `starttime` - Timestamp when the survey started
+- `startdate` - Date when the survey started
+- `uuid` - Unique identifier for the record
+- `swver` - Software version
+- `survey_id` - Survey definition ID
+- `lastmod` - Last modification timestamp
+- `stoptime` - Timestamp when the survey finished
 
 **Examples:**
 - ✅ `age`
@@ -194,6 +207,8 @@ The variable/field name that will be used in the database and XML.
 - ❌ `_fieldname` (starts with underscore)
 - ❌ `2ndvisit` (starts with number)
 - ❌ `first name` (contains space)
+- ❌ `starttime` (reserved field name)
+- ❌ `uuid` (reserved field name)
 
 ---
 
@@ -211,7 +226,7 @@ The type of question/input control.
 | `text` | Text entry field | Free text input |
 | `date` | Date picker | Date selection |
 | `information` | Display-only text | Show information without collecting data |
-| `automatic` | Auto-calculated/system field | Field populated by code (not shown to user) |
+| `calculated` | Auto-calculated/system field | Field populated by code (not shown to user) |
 | `button` | Action button | Trigger an action |
 
 **Requirements:**
@@ -248,7 +263,7 @@ The data type that determines how the value is stored and validated.
 The actual question text shown to users.
 
 **Requirements:**
-- Required for all question types except `automatic`
+- Required for all question types except `calculated`
 - Can contain any text, including special characters
 - Can include placeholder variables using `[[fieldname]]` syntax
   - Example: `"What is [[child_name]]'s date of birth?"`
@@ -432,9 +447,9 @@ mask:R21-[0-9][0-9][0-9]-[A-Z0-9][0-9A-Z][A-Z0-9][A-Z0-9]
 
 ---
 
-### Automatic Calculations
+### Calculated Field Calculations
 
-For questions with `QuestionType: automatic`, use the `Responses` column to define the calculation logic.
+For questions with `QuestionType: calculated`, use the `Responses` column to define the calculation logic.
 
 #### 1. Constant Value
 Assigns a static value to the field.
@@ -1104,7 +1119,7 @@ Checking worksheet: 'hh_info_dd'
 No errors found in 'hh_info_dd'
 
 Checking worksheet: 'hh_members_dd'
-Be sure to write code for each automatic variable: hhid, linenum
+Be sure to write code for each calculated field: hhid, linenum
 No errors found in 'hh_members_dd'
 
 Successfully generated survey_manifest.gistx
@@ -1131,13 +1146,15 @@ ERROR - LogicCheck: FieldName 'confirm_age' in worksheet 'enrollment_dd' has inv
 ### Common Validation Errors
 
 #### FieldName Errors
+- **Reserved field name**: Cannot use reserved field names (starttime, startdate, uuid, swver, survey_id, lastmod, stoptime)
 - **Starts with number**: Field names must start with a letter
 - **Not lowercase**: All field names must be lowercase
 - **Contains invalid characters**: Only letters, numbers, and underscores allowed
 - **Duplicate field names**: Each field name must be unique within a worksheet
 
 #### QuestionType/FieldType Errors
-- **Invalid QuestionType**: Must be one of: radio, checkbox, combobox, text, date, information, automatic, button
+- **Deprecated QuestionType**: The QuestionType 'automatic' is no longer supported. Use 'calculated' instead.
+- **Invalid QuestionType**: Must be one of: radio, checkbox, combobox, text, date, information, calculated, button
 - **Invalid FieldType**: Must be one of: text, integer, text_integer, text_decimal, text_id, phone_num, date, datetime, hourmin, n/a
 - **Mismatched types**:
   - Radio must use integer fieldtype
