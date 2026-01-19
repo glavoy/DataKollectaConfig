@@ -849,6 +849,35 @@ namespace generatexml
                             return;
                         }
                     }
+
+                    // Extract the skip value and validate format
+                    string skipValue;
+                    if (spaceIndices.Count == 9) // "does not contain" has 9 spaces
+                    {
+                        skipValue = skip.Substring(spaceIndices[5] + 1, spaceIndices[6] - spaceIndices[5] - 2);
+                    }
+                    else if (skip.Contains("contains"))
+                    {
+                        skipValue = skip.Substring(spaceIndices[3] + 1, spaceIndices[4] - spaceIndices[3] - 2);
+                    }
+                    else
+                    {
+                        skipValue = skip.Substring(spaceIndices[3] + 1, spaceIndices[4] - spaceIndices[3] - 2);
+                    }
+
+                    // Validate value format: must be numeric OR [[fieldname]] for dynamic reference
+                    if (!double.TryParse(skipValue, out _))
+                    {
+                        if (!skipValue.StartsWith("[[") || !skipValue.EndsWith("]]"))
+                        {
+                            errorsEncountered = true;
+                            worksheetErrorsEncountered = true;
+                            logstring.Add("ERROR - Skip: FieldName '" + fieldname + "' in worksheet '" + worksheet
+                                + "' has invalid skip value '" + skipValue
+                                + "'. Non-numeric values must be enclosed in [[brackets]] for dynamic field references.");
+                            return;
+                        }
+                    }
                 }
             }
             // Error handling in caase we could not crread the Excel file
@@ -1018,6 +1047,47 @@ namespace generatexml
                                 errorsEncountered = true;
                                 worksheetErrorsEncountered = true;
                                 logstring.Add("ERROR - Skip: In worksheet '" + worksheet + "', the skip for FieldName '" + curFieldname + "' skips to a nonexistent FieldName: " + fieldname_to_skip_to);
+                            }
+
+                            // Check if the skip value is a dynamic field reference [[fieldname]]
+                            // Extract the skip value from the skip string
+                            var spaceIndices = new List<int>();
+                            for (int i = 0; i < skip.Length; i++)
+                                if (skip[i] == ' ') spaceIndices.Add(i);
+
+                            string skipValue;
+                            if (spaceIndices.Count == 9) // "does not contain" has 9 spaces
+                            {
+                                skipValue = skip.Substring(spaceIndices[5] + 1, spaceIndices[6] - spaceIndices[5] - 2);
+                            }
+                            else if (skip.Contains("contains"))
+                            {
+                                skipValue = skip.Substring(spaceIndices[3] + 1, spaceIndices[4] - spaceIndices[3] - 2);
+                            }
+                            else
+                            {
+                                skipValue = skip.Substring(spaceIndices[3] + 1, spaceIndices[4] - spaceIndices[3] - 2);
+                            }
+
+                            // Validate dynamic field references exist and are before current question
+                            if (skipValue.StartsWith("[[") && skipValue.EndsWith("]]"))
+                            {
+                                string referencedField = skipValue.Substring(2, skipValue.Length - 4);
+                                if (fieldnameIndex.TryGetValue(referencedField, out int refIndex))
+                                {
+                                    if (refIndex > curIndex)
+                                    {
+                                        errorsEncountered = true;
+                                        worksheetErrorsEncountered = true;
+                                        logstring.Add("ERROR - Skip: In worksheet '" + worksheet + "', the skip for FieldName '" + curFieldname + "' references field '[[" + referencedField + "]]' which is AFTER the current question.");
+                                    }
+                                }
+                                else
+                                {
+                                    errorsEncountered = true;
+                                    worksheetErrorsEncountered = true;
+                                    logstring.Add("ERROR - Skip: In worksheet '" + worksheet + "', the skip for FieldName '" + curFieldname + "' references non-existent field '[[" + referencedField + "]]'.");
+                                }
                             }
                         }
                     }

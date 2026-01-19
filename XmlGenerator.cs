@@ -9,6 +9,11 @@ namespace generatexml
 {
     public class XmlGenerator
     {
+        // Indent constants: 4 spaces per level
+        private const string I1 = "    ";           // 1 level (4 spaces)
+        private const string I2 = "        ";       // 2 levels (8 spaces)
+        private const string I3 = "            ";   // 3 levels (12 spaces)
+
         public List<string> logstring = new List<string>();
 
         public void WriteXML(string xmlfilename, List<Question> QuestionList, string xmlPath)
@@ -25,7 +30,7 @@ namespace generatexml
                 }
 
                 // These are strings for the first two of lines in the xml file
-                string[] xmlStart = { "<?xml version = '1.0' encoding = 'utf-8'?>", "<survey>" };
+                string[] xmlStart = { "<?xml version='1.0' encoding='utf-8'?>", "<survey>" };
 
                 // Open a XML file and start writing lines of text to it
                 using (StreamWriter outputFile = new StreamWriter(string.Concat(xmlPath, xmlfilename, ".xml")))
@@ -34,8 +39,8 @@ namespace generatexml
                     foreach (string line in xmlStart)
                         outputFile.WriteLine(line);
 
-                    // Write a blank line 
-                    outputFile.WriteLine("\n");
+                    // Write a blank line
+                    outputFile.WriteLine("");
 
 
                     // Iterate through each question object in the QuestionList list
@@ -44,14 +49,14 @@ namespace generatexml
                     {
                         // Write the main part of the question
                         // Uses questionType, fieldName and fieldType
-                                                outputFile.WriteLine(string.Concat("\t<question type = '", question.questionType,
-                                                                                   "' fieldname = '", question.fieldName,
-                                                                                   "' fieldtype = '", question.fieldType, "'>"));
+                                                outputFile.WriteLine(string.Concat(I1, "<question type='", question.questionType,
+                                                                                   "' fieldname='", question.fieldName,
+                                                                                   "' fieldtype='", question.fieldType, "'>"));
 
 
                         // Write the text if it is not a calculated question
                         if (question.questionType != "calculated")
-                            outputFile.WriteLine(string.Concat("\t\t<text>", question.questionText, "</text>"));
+                            outputFile.WriteLine(string.Concat(I2, "<text>", question.questionText.Replace("'", "&apos;"), "</text>"));
 
                         // Generate calculation XML for calculated questions with custom calculations
                         if (question.questionType == "calculated" && question.CalculationType != CalculationType.None)
@@ -61,51 +66,42 @@ namespace generatexml
 
                         // The maximum characters if necessary
                         if (question.maxCharacters != "-9")
-                            outputFile.WriteLine(string.Concat("\t\t<maxCharacters>", question.maxCharacters, "</maxCharacters>"));
+                            outputFile.WriteLine(string.Concat(I2, "<maxCharacters>", question.maxCharacters, "</maxCharacters>"));
 
                         // Input Mask
                         if (!string.IsNullOrEmpty(question.mask))
-                            outputFile.WriteLine(string.Concat("\t\t<mask value=\"", question.mask, "\" />"));
+                            outputFile.WriteLine(string.Concat(I2, "<mask value=\"", question.mask, "\"/>"));
 
 
                         if (!string.IsNullOrEmpty(question.uniqueCheckMessage))
                         {
-                            outputFile.WriteLine("\t\t<unique_check>");
-                            outputFile.WriteLine(string.Concat("\t\t\t<message>", question.uniqueCheckMessage, "</message>"));
-                            outputFile.WriteLine("\t\t</unique_check>");
+                            outputFile.WriteLine(I2 + "<unique_check>");
+                            outputFile.WriteLine(string.Concat(I3, "<message>", question.uniqueCheckMessage, "</message>"));
+                            outputFile.WriteLine(I2 + "</unique_check>");
                         }
 
 
                         // Upper and Lower range (numeric check)
                         if (question.questionType != "date" && question.lowerRange != "-9")
                         {
-                            outputFile.WriteLine("\t\t<numeric_check>");
-                            outputFile.WriteLine(string.Concat("\t\t\t<values minvalue ='", question.lowerRange, "' maxvalue='", question.upperRange, "' other_values = '", question.lowerRange, "' message = 'Number must be between ", question.lowerRange, " and ", question.upperRange, "!'></values>"));
-                            outputFile.WriteLine("\t\t</numeric_check>");
+                            outputFile.WriteLine(I2 + "<numeric_check>");
+                            outputFile.WriteLine(string.Concat(I3, "<values minvalue='", question.lowerRange, "' maxvalue='", question.upperRange, "' other_values='", question.lowerRange, "' message='Number must be between ", question.lowerRange, " and ", question.upperRange, "!'/>"));
+                            outputFile.WriteLine(I2 + "</numeric_check>");
                         }
 
                         // Date range
                         if (question.questionType == "date")
                         {
-                            outputFile.WriteLine("\t\t<date_range>");
-                            outputFile.WriteLine(string.Concat("\t\t\t<min_date>", question.lowerRange, "</min_date>"));
-                            outputFile.WriteLine(string.Concat("\t\t\t<max_date>", question.upperRange, "</max_date>"));
-                            outputFile.WriteLine("\t\t</date_range>");
-                        }
-
-                        //  Logic Checks
-                        foreach (string logicCheck in question.logicChecks)
-                        {
-                            // New format: just output the logic check directly
-                            outputFile.WriteLine("\t\t<logic_check>");
-                            outputFile.WriteLine(GenerateLogicChecks(logicCheck));
-                            outputFile.WriteLine("\t\t</logic_check>");
+                            outputFile.WriteLine(I2 + "<date_range>");
+                            outputFile.WriteLine(string.Concat(I3, "<min_date>", question.lowerRange, "</min_date>"));
+                            outputFile.WriteLine(string.Concat(I3, "<max_date>", question.upperRange, "</max_date>"));
+                            outputFile.WriteLine(I2 + "</date_range>");
                         }
 
                         // Write responses if it is a radio or checkbox type question
                         if (question.questionType == "radio" || question.questionType == "checkbox" || question.questionType == "combobox")
                         {
-                            outputFile.Write("\t\t<responses");
+                            outputFile.Write(I2 + "<responses");
 
                             if (question.ResponseSourceType == ResponseSourceType.Csv)
                             {
@@ -120,43 +116,43 @@ namespace generatexml
                             // Filters
                             foreach (var filter in question.ResponseFilters)
                             {
-                                outputFile.WriteLine($"\t\t\t<filter column='{filter.Column}' operator='{filter.Operator}' value='{filter.Value}'/>");
+                                outputFile.WriteLine($"{I3}<filter column='{filter.Column}' operator='{filter.Operator}' value='{filter.Value}'/>");
                             }
 
                             // Display and Value
                             if (!string.IsNullOrEmpty(question.ResponseDisplayColumn))
                             {
-                                outputFile.WriteLine($"\t\t\t<display column='{question.ResponseDisplayColumn}'/>");
+                                outputFile.WriteLine($"{I3}<display column='{question.ResponseDisplayColumn}'/>");
                             }
                             if (!string.IsNullOrEmpty(question.ResponseValueColumn))
                             {
-                                outputFile.WriteLine($"\t\t\t<value column='{question.ResponseValueColumn}'/>");
+                                outputFile.WriteLine($"{I3}<value column='{question.ResponseValueColumn}'/>");
                             }
 
                             // Distinct
                             if (question.ResponseDistinct.HasValue)
                             {
-                                outputFile.WriteLine($"\t\t\t<distinct>{question.ResponseDistinct.Value.ToString().ToLower()}</distinct>");
+                                outputFile.WriteLine($"{I3}<distinct>{question.ResponseDistinct.Value.ToString().ToLower()}</distinct>");
                             }
 
                             // Empty Message
                             if (!string.IsNullOrEmpty(question.ResponseEmptyMessage))
                             {
-                                outputFile.WriteLine($"\t\t\t<empty_message>{question.ResponseEmptyMessage}</empty_message>");
+                                outputFile.WriteLine($"{I3}<empty_message>{question.ResponseEmptyMessage}</empty_message>");
                             }
 
                             // Don't Know
                             if (!string.IsNullOrEmpty(question.ResponseDontKnowValue))
                             {
                                 string labelAttr = string.IsNullOrEmpty(question.ResponseDontKnowLabel) ? "" : $" label='{question.ResponseDontKnowLabel}'";
-                                outputFile.WriteLine($"\t\t\t<dont_know value='{question.ResponseDontKnowValue}'{labelAttr}/>");
+                                outputFile.WriteLine($"{I3}<dont_know value='{question.ResponseDontKnowValue}'{labelAttr}/>");
                             }
 
                             // Not In List
                             if (!string.IsNullOrEmpty(question.ResponseNotInListValue))
                             {
                                 string labelAttr = string.IsNullOrEmpty(question.ResponseNotInListLabel) ? "" : $" label='{question.ResponseNotInListLabel}'";
-                                outputFile.WriteLine($"\t\t\t<not_in_list value='{question.ResponseNotInListValue}'{labelAttr}/>");
+                                outputFile.WriteLine($"{I3}<not_in_list value='{question.ResponseNotInListValue}'{labelAttr}/>");
                             }
 
 
@@ -166,20 +162,29 @@ namespace generatexml
 
                                 if (responses.Length == 0)
                                 {
-                                    outputFile.WriteLine("\t\t\t<response></response>");
+                                    outputFile.WriteLine(I3 + "<response></response>");
                                 }
                                 else
                                 {
                                     foreach (string response in responses)
                                     {
                                         int index = response.IndexOf(@":");
-                                        outputFile.WriteLine(string.Concat("\t\t\t<response value = '", response.Substring(0, index), "'>",
+                                        outputFile.WriteLine(string.Concat(I3, "<response value='", response.Substring(0, index), "'>",
                                                                             response.Substring(index + 1).Trim(), "</response>"));
                                     }
                                 }
                             }
 
-                            outputFile.WriteLine("\t\t</responses>");
+                            outputFile.WriteLine(I2 + "</responses>");
+                        }
+
+                        //  Logic Checks
+                        foreach (string logicCheck in question.logicChecks)
+                        {
+                            // New format: just output the logic check directly
+                            outputFile.WriteLine(I2 + "<logic_check>");
+                            outputFile.WriteLine(GenerateLogicChecks(logicCheck));
+                            outputFile.WriteLine(I2 + "</logic_check>");
                         }
 
 
@@ -210,26 +215,26 @@ namespace generatexml
                             // Create text preskips
                             if (preSkips.Count > 0)
                             {
-                                outputFile.WriteLine("\t\t<preskip>");
+                                outputFile.WriteLine(I2 + "<preskip>");
                                 foreach (string preSkip in preSkips)
                                 {
                                     // Call the GenerateSkips() function
                                     outputFile.WriteLine(GenerateSkips(preSkip, "preSkip"));
                                 }
-                                outputFile.WriteLine("\t\t</preskip>");
+                                outputFile.WriteLine(I2 + "</preskip>");
                             }
 
 
                             // Create text postskips
                             if (postSkips.Count > 0)
                             {
-                                outputFile.WriteLine("\t\t<postskip>");
+                                outputFile.WriteLine(I2 + "<postskip>");
                                 // Call the GenerateSkips() function
                                 foreach (string postSkip in postSkips)
                                 {
                                     outputFile.WriteLine(GenerateSkips(postSkip, "postSkip"));
                                 }
-                                outputFile.WriteLine("\t\t</postskip>");
+                                outputFile.WriteLine(I2 + "</postskip>");
                             }
                         }
 
@@ -237,28 +242,28 @@ namespace generatexml
 
                         // Don't know
                         if (question.dontKnow == "TRUE" || question.dontKnow == "True")
-                            outputFile.WriteLine("\t\t<dont_know>-7</dont_know>");
+                            outputFile.WriteLine(I2 + "<dont_know>-7</dont_know>");
 
                         // Refuse to answer
                         if (question.refuse == "TRUE" || question.refuse == "True")
-                            outputFile.WriteLine("\t\t<refuse>-8</refuse>");
+                            outputFile.WriteLine(I2 + "<refuse>-8</refuse>");
 
                         // Not applicable
                         if (question.na == "TRUE" || question.na == "True")
-                            outputFile.WriteLine("\t\t<na>-6</na>");
+                            outputFile.WriteLine(I2 + "<na>-6</na>");
 
                         // Close off the question
-                        outputFile.WriteLine("\t</question>");
+                        outputFile.WriteLine(I1 + "</question>");
                         outputFile.WriteLine("\n");
                     }
 
                     // The last 'info' question ending every survey
-                    string[] xmlEnd = {"\t<question type = 'information' fieldname = 'end_of_questions' fieldtype = 'n/a'>",
-                                   "\t\t<text>Press the 'Finish' button to save the data.</text >", "\t</question>" };
+                    string[] xmlEnd = {I1 + "<question type='information' fieldname='end_of_questions' fieldtype='n/a'>",
+                                   I2 + "<text>Press the &apos;Finish&apos; button to save the data.</text>", I1 + "</question>" };
                     foreach (string line in xmlEnd)
                         outputFile.WriteLine(line);
 
-                    outputFile.WriteLine("\n");
+                    outputFile.WriteLine("");
                     outputFile.WriteLine("</survey>");
                 }
             }
@@ -331,12 +336,36 @@ namespace generatexml
             // Get the field name to skip to
             string fieldname_to_skip_to = skip.Substring(spaceIndices[spaceIndices.Count - 1] + 1);
 
+            // Determine response_type based on value format
+            string responseType;
+            string responseValue;
+
+            if (double.TryParse(value, out _))
+            {
+                // Numeric value = fixed
+                responseType = "fixed";
+                responseValue = value;
+            }
+            else if (value.StartsWith("[[") && value.EndsWith("]]"))
+            {
+                // Field reference in double brackets = dynamic
+                responseType = "dynamic";
+                responseValue = value.Substring(2, value.Length - 4); // Remove [[ and ]]
+            }
+            else
+            {
+                // This shouldn't happen if validation passed, but handle gracefully
+                responseType = "fixed";
+                responseValue = value;
+            }
+
             // Build the string and return it
-            return string.Concat("\t\t\t<skip fieldname='", fieldname_to_check,
-                                 "' condition = '", condition,
-                                 "' response='", value,
-                                 "' response_type='fixed' skiptofieldname ='",
-                                 fieldname_to_skip_to, "'></skip>");
+            return string.Concat(I3, "<skip fieldname='", fieldname_to_check,
+                                 "' condition='", condition,
+                                 "' response='", responseValue,
+                                 "' response_type='", responseType,
+                                 "' skiptofieldname='",
+                                 fieldname_to_skip_to, "'/>");
         }
 
 
@@ -372,7 +401,7 @@ namespace generatexml
 
                 for (int i = 0; i < orParts.Length; i++)
                 {
-                    result.Append("\t\t\t");
+                    result.Append(I3);
                     result.Append(orParts[i].Trim());
 
                     if (i < orParts.Length - 1)
@@ -382,13 +411,13 @@ namespace generatexml
                     }
                 }
                 result.AppendLine(";");
-                result.Append("\t\t\t");
+                result.Append(I3);
                 result.Append(message);
             }
             else
             {
                 // Single line format
-                result.Append("\t\t\t");
+                result.Append(I3);
                 result.Append(expression);
                 result.Append("; ");
                 result.Append(message);
@@ -414,11 +443,11 @@ namespace generatexml
                     break;
 
                 case CalculationType.Constant:
-                    outputFile.WriteLine($"\t\t<calculation type='constant' value='{question.CalculationConstantValue}' />");
+                    outputFile.WriteLine($"{I2}<calculation type='constant' value='{question.CalculationConstantValue}'/>");
                     break;
 
                 case CalculationType.Lookup:
-                    outputFile.WriteLine($"\t\t<calculation type='lookup' field='{question.CalculationLookupField}' />");
+                    outputFile.WriteLine($"{I2}<calculation type='lookup' field='{question.CalculationLookupField}'/>");
                     break;
 
                 case CalculationType.Math:
@@ -430,50 +459,50 @@ namespace generatexml
                     break;
 
                 case CalculationType.AgeFromDate:
-                    outputFile.WriteLine($"\t\t<calculation type='age_from_date' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}'/>");
+                    outputFile.WriteLine($"{I2}<calculation type='age_from_date' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}'/>");
                     break;
 
                 case CalculationType.AgeAtDate:
                     string separatorAttr = string.IsNullOrEmpty(question.CalculationConcatSeparator)
                         ? ""
                         : $" separator='{question.CalculationConcatSeparator}'";
-                    outputFile.WriteLine($"\t\t<calculation type='age_at_date' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}'{separatorAttr}/>");
+                    outputFile.WriteLine($"{I2}<calculation type='age_at_date' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}'{separatorAttr}/>");
                     break;
 
                 case CalculationType.DateOffset:
-                    outputFile.WriteLine($"\t\t<calculation type='date_offset' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}' />");
+                    outputFile.WriteLine($"{I2}<calculation type='date_offset' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}'/>");
                     break;
 
                 case CalculationType.DateDiff:
-                    outputFile.WriteLine($"\t\t<calculation type='date_diff' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}' unit='{question.CalculationUnit}' />");
+                    outputFile.WriteLine($"{I2}<calculation type='date_diff' field='{question.CalculationLookupField}' value='{question.CalculationConstantValue}' unit='{question.CalculationUnit}'/>");
                     break;
             }
         }
 
         private void GenerateQueryCalculation(StreamWriter outputFile, Question question)
         {
-            outputFile.WriteLine("\t\t<calculation type='query'>");
-            outputFile.WriteLine($"\t\t\t<sql>{question.CalculationQuerySql}</sql>");
+            outputFile.WriteLine(I2 + "<calculation type='query'>");
+            outputFile.WriteLine($"{I3}<sql>{question.CalculationQuerySql}</sql>");
 
             foreach (var param in question.CalculationQueryParameters)
             {
                 // Keep the @ prefix in the parameter name
-                outputFile.WriteLine($"\t\t\t<parameter name='{param.Name}' field='{param.FieldName}' />");
+                outputFile.WriteLine($"{I3}<parameter name='{param.Name}' field='{param.FieldName}'/>");
             }
 
-            outputFile.WriteLine("\t\t</calculation>");
+            outputFile.WriteLine(I2 + "</calculation>");
         }
 
         private void GenerateCaseCalculation(StreamWriter outputFile, Question question)
         {
-            outputFile.WriteLine("\t\t<calculation type='case'>");
+            outputFile.WriteLine(I2 + "<calculation type='case'>");
 
             foreach (var condition in question.CalculationCaseConditions)
             {
                 // Convert operators to XML entities
                 string xmlOperator = ConvertOperatorToXml(condition.Operator);
 
-                outputFile.WriteLine($"\t\t\t<when field='{condition.Field}' operator='{xmlOperator}' value='{condition.Value}'>");
+                outputFile.WriteLine($"{I3}<when field='{condition.Field}' operator='{xmlOperator}' value='{condition.Value}'>");
 
                 // Generate result (typically a constant)
                 if (condition.Result != null)
@@ -481,30 +510,30 @@ namespace generatexml
                     GenerateCalculationPart(outputFile, condition.Result, 4);
                 }
 
-                outputFile.WriteLine("\t\t\t</when>");
+                outputFile.WriteLine(I3 + "</when>");
             }
 
             // Generate else clause if present
             if (question.CalculationCaseElse != null)
             {
-                outputFile.WriteLine("\t\t\t<else>");
+                outputFile.WriteLine(I3 + "<else>");
                 GenerateCalculationPart(outputFile, question.CalculationCaseElse, 4);
-                outputFile.WriteLine("\t\t\t</else>");
+                outputFile.WriteLine(I3 + "</else>");
             }
 
-            outputFile.WriteLine("\t\t</calculation>");
+            outputFile.WriteLine(I2 + "</calculation>");
         }
 
         private void GenerateMathCalculation(StreamWriter outputFile, Question question)
         {
-            outputFile.WriteLine($"\t\t<calculation type='math' operator='{question.CalculationMathOperator}'>");
+            outputFile.WriteLine($"{I2}<calculation type='math' operator='{question.CalculationMathOperator}'>");
 
             foreach (var part in question.CalculationMathParts)
             {
                 GenerateCalculationPart(outputFile, part, 3);
             }
 
-            outputFile.WriteLine("\t\t</calculation>");
+            outputFile.WriteLine(I2 + "</calculation>");
         }
 
         private void GenerateConcatCalculation(StreamWriter outputFile, Question question)
@@ -513,37 +542,37 @@ namespace generatexml
                 ? ""
                 : $" separator='{question.CalculationConcatSeparator}'";
 
-            outputFile.WriteLine($"\t\t<calculation type='concat'{separatorAttr}>");
+            outputFile.WriteLine($"{I2}<calculation type='concat'{separatorAttr}>");
 
             foreach (var part in question.CalculationConcatParts)
             {
                 GenerateCalculationPart(outputFile, part, 3);
             }
 
-            outputFile.WriteLine("\t\t</calculation>");
+            outputFile.WriteLine(I2 + "</calculation>");
         }
 
         private void GenerateCalculationPart(StreamWriter outputFile, CalculationPart part, int indentLevel)
         {
-            string indent = new string('\t', indentLevel);
+            string indent = new string(' ', indentLevel * 4);
 
             switch (part.Type)
             {
                 case CalculationType.Constant:
-                    outputFile.WriteLine($"{indent}<result type='constant' value='{part.ConstantValue}' />");
+                    outputFile.WriteLine($"{indent}<result type='constant' value='{part.ConstantValue}'/>");
                     break;
 
                 case CalculationType.Lookup:
-                    outputFile.WriteLine($"{indent}<part type='lookup' field='{part.LookupField}' />");
+                    outputFile.WriteLine($"{indent}<part type='lookup' field='{part.LookupField}'/>");
                     break;
 
                 case CalculationType.Query:
                     outputFile.WriteLine($"{indent}<part type='query'>");
-                    outputFile.WriteLine($"{indent}\t<sql>{part.QuerySql}</sql>");
+                    outputFile.WriteLine($"{indent}    <sql>{part.QuerySql}</sql>");
                     foreach (var param in part.QueryParameters)
                     {
                         // Keep the @ prefix in the parameter name
-                        outputFile.WriteLine($"{indent}\t<parameter name='{param.Name}' field='{param.FieldName}' />");
+                        outputFile.WriteLine($"{indent}    <parameter name='{param.Name}' field='{param.FieldName}'/>");
                     }
                     outputFile.WriteLine($"{indent}</part>");
                     break;
