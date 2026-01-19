@@ -1,0 +1,36 @@
+## Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+*.pdb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Visual Studio cache, logs, and settings
+.vs/
+*.vshost.*
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.tlog
+*.log
+
+## NuGet packages and build files
+packages/
+*.nupkg
+*.cache
+project.lock.json
+
+## Other common generated files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.resharper.user
+[Tt]humbs.db
+
+config.geoff.json
+
+Example_Data_Dictionaries/PRISM_Comprehensive_CSS_Data_Dictionary_2025_12_08_gistx.xlsx
