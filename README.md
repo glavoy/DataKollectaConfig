@@ -846,16 +846,16 @@ The `crfs` worksheet must have the following columns:
 | `auto_start_repeat` | `0`=Disabled, `1`=Prompt, `2`=Force |
 | `repeat_enforce_count` | `0` Flexible, `1` Warn, `2`=Force `3`=Auto-sync |
 | `display_fields` | Comma-separated list of fields to show in record lists |
-
+| `entry_condition` | Logic check of when this form should appear |
 
 
 ### Example CRFS Worksheet
 
-| display_order | tablename | displayname | isbase | primarykey | linkingfield | parenttable | incrementfield | idconfig | requireslink | repeat_count_field | auto_start_repeat | repeat_enforce_count | display_fields |
-|---------------|-----------|-------------|--------|------------|--------------|-------------|----------------|----------|--------------|-------------------|-------------------|---------------------|----------------|
-| 10 | hh_info | Household Survey | 1 | hhid | hhid | | | {"prefix":"3","fields":[{"name":"mrccode","length":2},{"name":"vcode","length":2}],"incrementLength":4} | 0 | | 0 | 0 | |
-| 20 | hh_members | Household Members | 0 | hhid,linenum | hhid | hh_info | linenum | | 1 | nmembers | 1 | 2 | participantsname |
-| 30 | nets | Mosquito Nets | 0 | hhid,netnum | hhid | hh_info | netnum | | 1 | nnets | 1 | 2 | [[brandnet]] |
+| display_order | tablename | displayname | isbase | primarykey | linkingfield | parenttable | incrementfield | idconfig | requireslink | repeat_count_field | auto_start_repeat | repeat_enforce_count | display_fields | entry_condition |
+|---------------|-----------|-------------|--------|------------|--------------|-------------|----------------|----------|--------------|-------------------|-------------------|---------------------|----------------|----------------|
+| 10 | hh_info | Household Survey | 1 | hhid | hhid | | | {"prefix":"3","fields":[{"name":"mrccode","length":2},{"name":"vcode","length":2}],"incrementLength":4} | 0 | | 0 | 0 | | |
+| 20 | hh_members | Household Members | 0 | hhid,linenum | hhid | hh_info | linenum | | 1 | nmembers | 1 | 2 | participantsname | enrolled=1 |
+| 30 | nets | Mosquito Nets | 0 | hhid,netnum | hhid | hh_info | netnum | | 1 | nnets | 1 | 2 | [[brandnet]] | enrolled=1 |
 
 ### ID Configuration (idconfig)
 
