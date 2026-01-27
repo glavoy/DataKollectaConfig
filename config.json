@@ -1,7 +1,7 @@
 {
-  "excelFile": "C:\\Users\\glavoy\\Dropbox\\IDRC\\R21TestNegative\\DataDictionary\\DataKollecta\\R21 Test Negative Data Dictionary_2026_01_19.xlsx",
-  "csvFiles": "C:\\Users\\glavoy\\Dropbox\\IDRC\\R21TestNegative\\DataDictionary\\",
+  "excelFile": "C:\\Users\\glavoy\\Proton Drive\\madala20\\My files\\Apps\\datakollecta-web\\Data Dictionaries and zips\\Geoff_CSS_Data_Dictionary_2026_01_21.xlsx",
+  "csvFiles": "C:\\Users\\glavoy\\Proton Drive\\madala20\\My files\\Apps\\datakollecta-web\\Data Dictionaries and zips\\",
   "outputPath": "C:\\temp\\",
-  "surveyName": "R21 Test Negative Data Kollecta",
-  "surveyId": "r21_test_negative_data_kollecta"
+  "surveyName": "Geoff CSS Test",
+  "surveyId": "geoff_css"
 }

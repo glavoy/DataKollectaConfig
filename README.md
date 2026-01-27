@@ -843,9 +843,11 @@ The `crfs` worksheet must have the following columns:
 | `idconfig` | JSON object defining ID generation rules |
 | `requireslink` | `1` if form requires a parent link, `0` otherwise |
 | `repeat_count_field` | Field containing count of child records |
-| `auto_start_repeat` | `0`=Flexible, `1`=Warn, `2`=Force, `3`=Auto-Sync |
-| `repeat_enforce_count` | `1` to enforce exact count, `0` otherwise |
+| `auto_start_repeat` | `0`=Disabled, `1`=Prompt, `2`=Force |
+| `repeat_enforce_count` | `0` Flexible, `1` Warn, `2`=Force `3`=Auto-sync |
 | `display_fields` | Comma-separated list of fields to show in record lists |
+
+
 
 ### Example CRFS Worksheet
 
@@ -928,7 +930,7 @@ If the household form asks "How many members?" (`nmembers`), and the user enters
 Controls how the app behaves when a user reaches a point where child records (like household members) need to be added.
 
 **Values:**
-- **`0` (Default)**: **Manual**. The app does nothing automatically. The user must manually navigate to add child records.
+- **`0`**: **Disabled**. The user must manually navigate to the child form menu and select "Add New" to start this survey.
 - **`1`**: **Prompt**. The app shows a dialog: "You indicated X records. Would you like to add them now?" with options "Add Now" or "Add Later".
 - **`2`**: **Force/Auto**. The app automatically starts the loop to add the child records immediately, without asking.
 
@@ -938,7 +940,7 @@ Controls what happens if the number of child records added doesn't match the num
 
 **Values:**
 - **`0`**: **Flexible**. No enforcement. The user can add any number of records, regardless of what they initially said.
-- **`1` (Default)**: **Warn**. Shows a warning dialog: "Incomplete Data". The user can choose to "Exit Anyway" (keeping the mismatch) or "Update Count" (which automatically updates the parent question to match the actual number of records added).
+- **`1`**: **Warn**. Shows a warning dialog: "Incomplete Data". The user can choose to "Exit Anyway" (keeping the mismatch) or "Update Count" (which automatically updates the parent question to match the actual number of records added).
 - **`2`**: **Force**. Shows a blocking dialog: "Must Complete All". The user is strongly urged to continue until all records are added. They can still choose "Exit Anyway" (marked in red), but the UI is designed to force completion.
 - **`3`**: **Auto-Sync**. Silently updates the parent question to match the actual number of records added, without showing any error or warning to the user.
 
@@ -948,6 +950,7 @@ Controls what happens if the number of child records added doesn't match the num
 - `repeat_enforce_count`: `2` (force completion)
 
 ---
+
 
 ## Examples
 
